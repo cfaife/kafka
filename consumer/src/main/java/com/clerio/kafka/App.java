@@ -39,13 +39,14 @@ public class App {
         consumer.subscribe(Collections.singleton("my-topic"));
 
         while (true) {
+           System.out.println("Consumer service is ready to poll messasges:");
            ConsumerRecords<String,String> records =
                 consumer.poll(Duration.ofMillis(5000));
             for(ConsumerRecord<String, String> record: records){
                 System.out.println(
                     "key: "+record.key()+
-                    "offset:"+record.offset()+
-                    "value:"+record.value()
+                    ", offset:"+record.offset()+
+                    ", value:"+record.value()
                     );
             }
             

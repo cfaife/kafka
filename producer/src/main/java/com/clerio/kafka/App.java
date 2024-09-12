@@ -7,8 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -19,28 +18,22 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 /**
- * Hello world!
- *
+ * @author Clerio Alfredo Faife
  */
 public class App {
     public static void main( String[] args ) throws IOException,InterruptedException, ExecutionException{
 
 
-        ServerSocket serverSocket = new ServerSocket(8080);
-        System.out.println("Server is listening in port 8080");
-        while (true){
-            Socket socket =    serverSocket.accept();
-            handleRequest(socket);
-            
-        
-        }
-        //sendMessage("Some message");
-
-
-
+        try(ServerSocket serverSocket = new ServerSocket(8080)){
+            System.out.println("Publisher server is listening in port 8080");
+            while (true){
+                Socket socket = serverSocket.accept();
+                handleRequest(socket);
+            }
+        }        
     }
 
-    static void handleRequest(Socket socket)throws IOException{
+    static void handleRequest(Socket socket)throws IOException, InterruptedException, ExecutionException{
         BufferedReader bufferedReader 
             = new BufferedReader(
                 new InputStreamReader(
@@ -49,17 +42,22 @@ public class App {
         PrintWriter  printWriter
             = new PrintWriter(new ObjectOutputStream(socket.getOutputStream()));
 
-        Map<String,String> headers = new HashMap<>();
-        String line = bufferedReader.readLine();
-        String header;
-        while ((header = bufferedReader.readLine()) != null 
-            && !header.isEmpty()){
-            int colonIndex = header.indexOf(":");
-            String key 
-                =header.substring(0, colonIndex).trim();
-            String value = header.substring(colonIndex+1).trim();
-            headers.put(key, value);
+        String line;
+        while ((line = bufferedReader.readLine()) != null 
+            && !line.isEmpty()){
+            if(line.contains("GET")){
+                String record=line.substring(5, line.indexOf("H"));
+                System.out.println("record >>>>>>>>" +record);
+
+                sendMessageToTopic(record);
+                
+            } 
+            System.out.println(line);
+            
+           
         }
+        System.out.println("\n");
+
         String response = "HTTP/1.1 200 OK\r\n" +
         "Content-Type: text/plain\r\n" +
         "Content-Length: " + "done".length() + "\r\n" +
@@ -89,7 +87,7 @@ public class App {
             = new KafkaProducer<>(properties);
 
         ProducerRecord<String,String> record 
-            = new ProducerRecord<>("my-topic", messageValue);
+            = new ProducerRecord<>("my-topic", "mycustomkay",messageValue);
 
         Future<RecordMetadata> metadata = producer.send(record);
         System.out.println(metadata.get());
