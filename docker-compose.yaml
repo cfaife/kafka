@@ -14,4 +14,21 @@ services:
       - "9092:9092"
     depends_on:
       - zookeeper
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus-data:/etc/prometheus
+      - prometheus-rules:/etc/prometheus/rules
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      - kafka
+
+volumes:
+  prometheus-data:
+  prometheus-rules:
     
