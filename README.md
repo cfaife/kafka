@@ -1,4 +1,8 @@
 
+##  Tology
+
+![alt text](essay-topology.png)
+
 ## Requirements
 
 Ensure that you have the follwing `maven` dependecies in your java applications:
