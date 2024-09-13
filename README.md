@@ -1,5 +1,5 @@
 
-##  Tology
+##  Topology
 
 ![alt text](essay-topology.png)
 
