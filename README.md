@@ -1,7 +1,7 @@
 
 ## Requirements
 
-Ensure that you have the follwing `maven` dependecies:
+Ensure that you have the follwing `maven` dependecies in your java applications:
 
     <dependency>
       <groupId>org.apache.kafka</groupId>
@@ -38,3 +38,24 @@ To see if the messages are being sent to the topic in Kafka `/bin`  folder run t
     ./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my-topic
 
 This will log real time messages/events being sent to your topic
+
+
+## Prometheus integration
+
+### On prometheus side
+
+Add the prometheus configurtion
+
+    scrape_configs:
+    - job_name: kafka
+        static_configs:
+        - targets: ['kafka:9200']
+
+### On Kafka side
+
+Add the following environment variable on your container configuration:
+
+    KAFKA_OPTS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-0.20.0.jar=9200:/usr/share/jmx_exporter/kafka-broker.yml
+
+
+

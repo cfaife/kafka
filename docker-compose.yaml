@@ -12,8 +12,13 @@ services:
     container_name: kafka
     ports:
       - "9092:9092"
+      - "9200:9200" # to expose the port used by the JMX Prometheus java agent
     depends_on:
       - zookeeper
+    environment:
+      KAFKA_OPTS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-0.20.0.jar=9200:/usr/share/jmx_exporter/kafka-broker.yml
+    volumes:
+      - ./jmx-exporter:/usr/share/jmx_exporter/
 
   prometheus:
     image: prom/prometheus
