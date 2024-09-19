@@ -31,6 +31,7 @@ public class Database {
     public void insert(String record, Connection connection){
 
         try{
+            connection.setAutoCommit(false);
             PreparedStatement preparedStatement =connection.prepareStatement("insert into info (record) values(?)");
             preparedStatement.setString(1, record);
             preparedStatement.executeUpdate();
