@@ -1,27 +1,68 @@
 version: '3.7'
 
 services:
-  zookeeper:
-    image: zookeeper:latest
-    container_name: zookeeper
+
+  #zookeeper:
+  #  image: zookeeper:latest
+  #  container_name: zookeeper
+  #  ports:
+  #    - "2181:2181"
+
+
+  consumer:
+    build: 
+      context: ./consumer
+      dockerfile: Dockerfile
+    image: consumer:latest
+    container_name: consumer
+    depends_on:
+      - kafka
+      - postgres
+
+  producer:
+    build: 
+      context: ./producer
+      dockerfile: Dockerfile
+    image: producer:latest
+    container_name: producer
     ports:
-      - "2181:2181"
+      - 8080:8080
+    depends_on:
+      - kafka
+      - consumer
+      
 
   kafka:
     image: apache/kafka:latest
     container_name: kafka
     ports:
       - "9092:9092"
-      - "9200:9200" # to expose the port used by the JMX Prometheus java agent
-    depends_on:
-      - zookeeper
+    # - "9200:9200" # to expose the port used by the JMX Prometheus java agent
     environment:
-      KAFKA_OPTS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-0.20.0.jar=9200:/usr/share/jmx_exporter/kafka-broker.yml
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'   # Disable auto topic creation
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
     volumes:
-      - ./jmx-exporter:/usr/share/jmx_exporter/
+      - kafka_data:/var/lib/kafka/data
+    #depends_on:
+    #  - zookeeper
+  
+
+    #  KAFKA_OPTS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-0.20.0.jar=9200:/usr/share/jmx_exporter/kafka-broker.yml
+    #volumes:
+    #  - ./jmx-exporter:/usr/share/jmx_exporter/
+
 
   prometheus:
     image: prom/prometheus
+    container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -33,7 +74,23 @@ services:
     depends_on:
       - kafka
 
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: kafkadb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
 volumes:
   prometheus-data:
   prometheus-rules:
+  kafka_data:
+  postgres_data:
+    driver: local
     

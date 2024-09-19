@@ -75,7 +75,7 @@ public class App {
         Properties properties = new Properties();
         properties.setProperty(
             ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, 
-            "127.0.0.1:9092");
+            "kafka:9092");
         properties.setProperty(
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, 
             StringSerializer.class.getName());
@@ -87,10 +87,17 @@ public class App {
             = new KafkaProducer<>(properties);
 
         ProducerRecord<String,String> record 
-            = new ProducerRecord<>("my-topic", "mycustomkay",messageValue);
+            //= new ProducerRecord<>("my-topic", "mycustomkay",messageValue);
+            = new ProducerRecord<>("my-topic",messageValue);
 
-        Future<RecordMetadata> metadata = producer.send(record);
-        System.out.println(metadata.get());
+        producer.send(record,(metadata,exception)-> {
+            if (exception == null) {
+                System.out.println("Message sent sucessfully >>>>>>>> "+ metadata.toString());
+            }else{
+                exception.printStackTrace();
+            }
+
+        });
 
         producer.flush();
         producer.close();

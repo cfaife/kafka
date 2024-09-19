@@ -1,3 +1,3 @@
 add datbase for consumer service
 containerize consumer and producer
-remove zookeeper
+remove zookeeper replace with kraft mode
