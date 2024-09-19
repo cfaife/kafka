@@ -29,13 +29,14 @@ public class Database {
     }
 
     public void insert(String record, Connection connection){
+        String r = record+"-proccessed";
 
         try{
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement =connection.prepareStatement("insert into info (record) values(?)");
-            preparedStatement.setString(1, record);
+            preparedStatement.setString(1, r);
             preparedStatement.executeUpdate();
-            System.out.println("Inserting <"+record+ "> in the 'info' table in the kafkadb");
+            System.out.println("Inserting <"+r+ "> in the 'info' table in the kafkadb");
 
 
             connection.commit();

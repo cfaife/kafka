@@ -1,3 +1,10 @@
+# Kafka 
+
+
+## Introduction
+
+This small project is a PoC of kafka messaging broker in Kraft mode, when some of the metrics are scraped to Prometheus
+
 
 ##  Topology
 
@@ -5,23 +12,36 @@
 
 ## Requirements
 
+#### On your OS
+
+You just need to have installed:
+
+* Docker 
+* Docker Compose
+* OpenJDK 17+
+* Maven
+
+#### For the Java applications
+
 Ensure that you have the follwing `maven` dependecies in your java applications:
 
     <dependency>
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka-clients</artifactId>
       <version>3.8.0</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
         <version>2.0.16</version>
-        <scope>test</scope>
+        <scope>runtime</scope>
     </dependency>
     <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>2.0.16</version>
+        <scope>compile</scope>
     </dependency>
     
 
@@ -44,6 +64,7 @@ To see if the messages are being sent to the topic in Kafka `/bin`  folder run t
     ./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my-topic --from-beginning
 
 Specifying the partition
+
     ./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my-topic --partition 0  --from-beginning
 
 
@@ -106,12 +127,28 @@ Example (PLAINTEXT://kafka:9092):
 
 ### Kraft mode
 
-And since we are running it Kraft mode (with no Zookeeper), aditional configs where added to the broker container as environment variables:
+And since we are running it in Kraft mode (with no Zookeeper), aditional configs where added to the broker container as environment variables:
     
     KAFKA_NODE_ID: 1
     KAFKA_PROCESS_ROLES: broker,controller
     KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093 
     KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+
+## NOTE
+
+You likely might find issues to create `topic` while the port 9200  of JMX to enable prometheus metrics  is enabled. This likely happens when you run it for first time.
+
+`TIP`: To overcome that, disable(comment) everything related to prometheus, in your Kafka service inside of the docker compose file, commenting the following lines:
+
+          # KAFKA_OPTS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-0.20.0.jar=9200:/usr/share/jmx_exporter/kafka-broker.yml
+          #      - "9200:9200" # to expose the port used by the JMX Prometheus java agent
+          #       - ./jmx-exporter:/usr/share/jmx_exporter/
+
+And then create the topic, once your topic is created you can then uncomment  the commented lines and spinup your docker services again. 
+
+ 
+
 
 
 
