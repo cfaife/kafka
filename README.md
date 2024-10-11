@@ -98,7 +98,7 @@ Add the following environment variable on your container configuration:
 
 ## Configuration
 
-Since we are using docker compose project there are some concepts to understand:
+Since we are running services in containers there are some concepts to understand:
 #### 1. KAFKA_LISTENERS: Where Kafka Binds and Listens
 
 Purpose: This configuration tells Kafka on which network interfaces and ports it should listen for incoming connections.
@@ -127,7 +127,7 @@ Example (PLAINTEXT://kafka:9092):
 
 ### Kraft mode
 
-And since we are running it in Kraft mode (with no Zookeeper), aditional configs where added to the broker container as environment variables:
+And since we are running it in Kraft mode ( no Zookeeper), aditional configs were added to the broker container as environment variables:
     
     KAFKA_NODE_ID: 1
     KAFKA_PROCESS_ROLES: broker,controller
